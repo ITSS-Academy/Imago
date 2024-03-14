@@ -87,7 +87,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       comment: CommentState;
       notification: NotiState;
     }>,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.subscription.push(
@@ -266,5 +266,21 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.store.dispatch(
       NotifiActions.createNotification({ notification: newNotification }),
     );
+  }
+
+  likePost(index: number) {
+
+
+    let item = this.postList[index];
+    let reaction = [...item.reaction];
+    reaction.push(this.profile.id);
+
+    let newPost = {
+      ...item,
+      reaction: reaction,
+    };
+
+    this.store.dispatch(PostActions.update({ post: newPost }));
+
   }
 }
