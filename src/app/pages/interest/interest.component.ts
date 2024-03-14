@@ -35,6 +35,8 @@ type Category = {
 export class InterestComponent implements OnInit, OnDestroy {
   subscription: Subscription[] = [];
   isLoading = false;
+  isSelectAll = false;
+  isGetSuccess=false
 
   // observable
   token$ = this.store.select('auth', 'token');
@@ -47,13 +49,13 @@ export class InterestComponent implements OnInit, OnDestroy {
     'isGettingCategoryList',
   );
   categories$ = this.store.select('category', 'categories');
-
+  categoriesAllSuccess$ = this.store.select('category', 'allCategories');
   isGetProfileSuccess$ = this.store.select('profile', 'profile');
 
   // category
   categories: CategoryModel[] = [];
   haveCategories = false;
-
+  allCategories: CategoryModel[] = [];
   //carousel
   page = 1;
   index = 0;
@@ -146,6 +148,17 @@ export class InterestComponent implements OnInit, OnDestroy {
           this.mappingCategory(data.data, this.page);
         }
       }),
+
+      
+
+      // this.categoriesAllSuccess$.subscribe((category) => {
+      //   if (category) {
+      //     this.selectedItems = category; 
+      //     if(this.selectedItems.length > 0){
+      //       this.haveCategories = true;
+      //     }
+      //   }
+      // }),
     );
   }
 
@@ -163,13 +176,11 @@ export class InterestComponent implements OnInit, OnDestroy {
   }
 
   toggleActive(item: any) {
-
     item.isActive = !item.isActive;
     if (item.isActive) {
-
       this.selectedItems.push(item);
+      console.log('item', item);
       this.countSelected++;
-
     } else {
       this.countSelected--;
       this.selectedItems = this.selectedItems.filter(
@@ -182,7 +193,6 @@ export class InterestComponent implements OnInit, OnDestroy {
     } else {
       this.haveCategories = false;
     }
-
   }
 
   mappingCategory(categories: any, page: number) {
@@ -226,8 +236,6 @@ export class InterestComponent implements OnInit, OnDestroy {
   }
 
   next() {
-
-
     let listCategory = this.selectedItems.map((item: any) => item.id);
 
     let profile: ProfileModel = {
@@ -240,6 +248,54 @@ export class InterestComponent implements OnInit, OnDestroy {
       this.router.navigate(['/home']).then();
     } else {
       this.alertService.errorNotification('Please select at least 1 category');
+    }
+  }
+
+  selectAllItems() {
+    this.store.dispatch(CategoryActions.getAllCategoryList());
+    this.subscription.push(
+      this.categoriesAllSuccess$.subscribe((category) => {
+        if (category) {
+          this.selectedItems = category;
+          this.haveCategories = true;
+        }
+      }),
+    );
+    this.countSelected = 60;
+    this.items.forEach((item) => {
+      item.isActive = true;
+      if (this.items.length < 30) {
+       
+      }
+    });
+
+    this.secondaryItems.forEach((item) => {
+      item.isActive = true;
+      
+    });
+   
+    this.isSelectAll = true;
+
+   
+  }
+
+  unselectAllItems() {
+    this.selectedItems = [];
+    this.countSelected = 0;
+    this.items.forEach((item) => {
+      item.isActive = false;
+    });
+
+    this.secondaryItems.forEach((item) => {
+      item.isActive = false;
+    });
+
+    this.isSelectAll = false;
+
+    if (this.selectedItems.length > 0) {
+      this.haveCategories = true;
+    } else {
+      this.haveCategories = false;
     }
   }
 }
