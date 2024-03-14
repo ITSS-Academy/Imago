@@ -8,6 +8,10 @@ const initialState: PostState = {
   postResponse: <PostResponse>{},
   postDetail: <PostModel>{},
 
+  isReaction: false,
+  reactionSuccess: false,
+  reactionErrorMessage: <HttpErrorResponseModel>{},
+
   isCreating: false,
   isCreateSuccess: false,
   createErrorMessage: <HttpErrorResponseModel>{},

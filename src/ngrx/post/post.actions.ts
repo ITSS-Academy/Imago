@@ -2,6 +2,17 @@ import { createAction, props } from '@ngrx/store';
 import { PostModel, PostResponse } from '../../app/model/post.model';
 import { HttpErrorResponseModel } from '../../app/model/http-error-response.model';
 
+export const reaction = createAction(
+  '[Post] Reaction',
+  props<{ postId: string; otherId: string }>(),
+);
+export const reactionSuccess = createAction('[Post] Reaction Success');
+export const reactionFailure = createAction(
+  '[Post] Reaction Failure',
+  props<{ reactionErrorMessage: HttpErrorResponseModel }>(),
+);
+
+
 export const create = createAction(
   '[Post] Create',
   props<{ post: PostModel }>(),
