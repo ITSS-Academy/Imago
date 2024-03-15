@@ -10,7 +10,7 @@
       (scrolled)="onScrollDown($event)"
     >
       <div class="allPost">
-        @for (item of postList; track item) {
+        @for (item of postList; track item.id) {
           <div class="post">
             <!--  Picture post -->
             <div class="picture-post">
@@ -177,6 +177,8 @@
                   icon="tuiIconHeartLarge"
                   size="m"
                 ></button>
+                <p class="tui-text_body-xl">{{ item.reaction.length }}</p>
+
                 <button
                   tuiIconButton
                   type="button"
@@ -185,6 +187,8 @@
                   icon="tuiIconMessageCircleLarge"
                   size="m"
                 ></button>
+                <p class="tui-text_body-xl">{{ item.comments.length }}</p>
+
                 <button
                   tuiIconButton
                   type="button"
@@ -416,6 +420,7 @@
                     icon="tuiIconHeartLarge"
                     size="m"
                   ></button>
+                  {{ postDetail.reaction.length }}
                   <button
                     tuiIconButton
                     type="button"
@@ -424,6 +429,7 @@
                     icon="tuiIconMessageCircleLarge"
                     size="m"
                   ></button>
+                  {{ postDetail.comments.length }}
                   <button
                     tuiIconButton
                     type="button"
