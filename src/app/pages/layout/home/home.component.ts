@@ -30,6 +30,7 @@ import * as CommentActions from '../../../../ngrx/comment/comment.actions';
 import { DateToStringPipe } from '../../../shared/pipes/date-to-string.pipe';
 import { NotiState } from '../../../../ngrx/noti/noti.state';
 import * as NotifiActions from '../../../../ngrx/noti/noti.actions';
+import { NotificationService } from '../../../service/notification/notification.service';
 
 type Comment = {
   authorId: string;
@@ -38,7 +39,9 @@ type Comment = {
 };
 type Post = {
   id: string;
+  isLiked: boolean;
   reaction: string[];
+
 };
 @Component({
   selector: 'app-home',
@@ -95,6 +98,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   skeletonVisible = false;
 
   constructor(
+    private notificationService: NotificationService,
     private router: Router,
     @Inject(TuiDialogService) private readonly dialogsReport: TuiDialogService,
     private readonly dialogsDetail: TuiDialogService,
@@ -163,13 +167,33 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
       }),
 
-      // this.$posts.subscribe((value)=>{
-      //   if(value)
-      //   this.posts = value;
-      // })
+      this.$posts.subscribe((value) => {
+        if (value)
+          this.postList = value;
+        if (!this.postList || !this.postList.length) {
+          for (let i = 0; i < this.postList.length; i++) {
+            this.reaction.push({
+              id: this.postList[i].id, isLiked: this.postList[i].reaction.includes(this.currentUser.id), reaction: this.postList[i].reaction
+            });
+          }
+        }
+        else {
+          for (let i = 0; i < this.postList.length; i++) {
+            const index = this.reaction.findIndex((p) => p.id === this.postList[i].id);
+            if (index !== -1) {
+              this.reaction[index] = {
+                id: this.postList[i].id, isLiked: this.postList[i].reaction.includes(this.currentUser.id), reaction: this.postList[i].reaction
+              };
+            } else {
+              this.reaction.push({
+                id: this.postList[i].id, isLiked: this.postList[i].reaction.includes(this.currentUser.id), reaction: this.postList[i].reaction
+              });
+            }
+          }
+        }
+      }),
     );
   }
-
   ngOnDestroy(): void {
     this.subscription.forEach((sub) => sub.unsubscribe());
     this.store.dispatch(PostActions.clearGetState());
@@ -341,17 +365,12 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   //react to post
   reactPost(postId: string, senderId: string) {
-    this.isLiked = !this.isLiked;
-    if (this.isLiked === true) {
-      this.store.dispatch(
-        PostActions.reaction({ postId: postId, senderId: senderId }),
+    const index = this.reaction.findIndex((p) => p.id === senderId);
+    if (index) {
+      this.notificationService.successNotification(
+        `React to post successfully`,
       );
-      console.log('reacted');
-    } else {
-      this.store.dispatch(
-        PostActions.unReaction({ postId: postId, senderId: senderId }),
-      );
-      console.log('unreacted');
     }
   }
 }
+
