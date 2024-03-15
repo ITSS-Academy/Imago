@@ -35,7 +35,9 @@ type Category = {
 export class InterestComponent implements OnInit, OnDestroy {
   subscription: Subscription[] = [];
   isLoading = false;
+  loader = false;
   isSelectAll = false;
+  isGetSuccess = false;
 
   // observable
   token$ = this.store.select('auth', 'token');
@@ -48,19 +50,23 @@ export class InterestComponent implements OnInit, OnDestroy {
     'isGettingCategoryList',
   );
   categories$ = this.store.select('category', 'categories');
+  categoriesAllSuccess$ = this.store.select('category', 'allCategories');
+  isGetProfileSuccess$ = this.store.select('profile', 'mine');
 
-  isGetProfileSuccess$ = this.store.select('profile', 'profile');
+  isUpdatingProfile$ = this.store.select('profile', 'isUpdating');
+  isUpdateProfileSuccess$ = this.store.select('profile', 'isUpdateSuccess');
 
   // category
   categories: CategoryModel[] = [];
   haveCategories = false;
-
+  allCategories: CategoryModel[] = [];
   //carousel
   page = 1;
   index = 0;
   itemsCount = 5;
   items: Category[] = [];
   secondaryItems: Category[] = [];
+  scrollIndex = 0;
 
   // items
   selectedItems: any = [];
@@ -89,7 +95,7 @@ export class InterestComponent implements OnInit, OnDestroy {
     }>,
     private alertService: NotificationService,
   ) {
-    for (let index = 0; index < 50; index++) {
+    for (let index = 0; index < 30; index++) {
       this.items[index] = {
         id: '',
         title: '',
@@ -107,6 +113,7 @@ export class InterestComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscription.forEach((sub) => sub.unsubscribe());
+    this.store.dispatch(CategoryActions.clearAll());
   }
 
   ngOnInit(): void {
@@ -159,6 +166,7 @@ export class InterestComponent implements OnInit, OnDestroy {
     if (this.index > 0) {
       this.page = this.index / this.itemsCount + 1;
     }
+    console.log('index', this.index, 'page', this.page);
 
     this.getCategoriesByPage(this.index, this.page);
   }
@@ -220,16 +228,16 @@ export class InterestComponent implements OnInit, OnDestroy {
         this.mappingCategory(data.data, page);
       }
     });
+
+    this.store.dispatch(CategoryActions.clearAll());
   }
 
   next() {
     let listCategory = this.selectedItems.map((item: any) => item.id);
-
     let profile: ProfileModel = {
       ...this.profile,
       category: listCategory,
     };
-
     if (listCategory.length > 0) {
       this.store.dispatch(ProfileActions.updateMine({ mine: profile }));
       this.router.navigate(['/home']).then();
@@ -239,40 +247,39 @@ export class InterestComponent implements OnInit, OnDestroy {
   }
 
   selectAllItems() {
+    this.store.dispatch(CategoryActions.getAllCategoryList());
+    this.subscription.push(
+      this.categoriesAllSuccess$.subscribe((category) => {
+        if (category) {
+          this.selectedItems = category;
+          this.haveCategories = true;
+        }
+      }),
+    );
+    this.countSelected = 60;
     this.items.forEach((item) => {
       item.isActive = true;
-      this.selectedItems.push(item);
-      if (this.items.length < 25) {
-        this.countSelected++;
+      if (this.items.length < 30) {
       }
     });
 
     this.secondaryItems.forEach((item) => {
       item.isActive = true;
-      this.selectedItems.push(item);
-      this.countSelected++;
     });
 
     this.isSelectAll = true;
-
-    if (this.selectedItems.length > 0) {
-      this.haveCategories = true;
-    } else {
-      this.haveCategories = false;
-    }
+    this.store.dispatch(CategoryActions.clearAll());
   }
 
   unselectAllItems() {
+    this.selectedItems = [];
+    this.countSelected = 0;
     this.items.forEach((item) => {
       item.isActive = false;
-      this.selectedItems = [];
-      this.countSelected = 0;
     });
 
     this.secondaryItems.forEach((item) => {
       item.isActive = false;
-      this.selectedItems = [];
-      this.countSelected = 0;
     });
 
     this.isSelectAll = false;
@@ -282,5 +289,51 @@ export class InterestComponent implements OnInit, OnDestroy {
     } else {
       this.haveCategories = false;
     }
+  }
+
+  onScroll(ev: any) {
+    if (this.scrollIndex < ev) {
+      if (this.page <= 5) {
+        this.index = this.index;
+        this.index += 4;
+        this.page += 1;
+
+        this.store.dispatch(
+          CategoryActions.getCategoryList({ page: this.page }),
+        );
+
+        this.categories$.subscribe((categories) => {
+          if (categories.length === 0) {
+            this.isLoading = true;
+          } else {
+            let data = { ...categories } as any;
+            this.mappingCategory(data.data, this.page);
+          }
+        });
+      }
+      this.scrollIndex = ev;
+    } else {
+      // decrease index
+      if (this.page > 1) {
+        this.index = this.index;
+        this.index -= 4;
+        this.page -= 1;
+
+        this.store.dispatch(
+          CategoryActions.getCategoryList({ page: this.page }),
+        );
+
+        this.categories$.subscribe((categories) => {
+          if (categories.length === 0) {
+            this.isLoading = true;
+          } else {
+            let data = { ...categories } as any;
+            this.mappingCategory(data.data, this.page);
+          }
+        });
+      }
+      this.scrollIndex = ev;
+    }
+    this.store.dispatch(CategoryActions.clearAll());
   }
 }
