@@ -5,9 +5,16 @@ import { PostState } from './post.state';
 import { HttpErrorResponseModel } from '../../app/model/http-error-response.model';
 
 const initialState: PostState = {
+  post: <PostModel>{},
+  posts: [],
+
   isReaction: false,
   reactionSuccess: false,
   reactionErrorMessage: <HttpErrorResponseModel>{},
+
+  isUnReaction: false,
+  unReactionSuccess: false,
+  unReactionErrorMessage: <HttpErrorResponseModel>{},
 
   minePost: <PostResponse>{},
   postResponse: <PostResponse>{},
@@ -404,6 +411,31 @@ export const postReducer = createReducer(
       ...state,
       isReaction: false,
       reactionErrorMessage: reactionErrorMessage,
+    };
+  }),
+
+  //unReaction
+  on(PostActions.unReaction, (state, { type }) => {
+    console.log(type);
+    return {
+      ...state,
+      isUnReaction: true,
+    };
+  }),
+  on(PostActions.unReactionSuccess, (state, { type }) => {
+    console.log(type);
+    return {
+      ...state,
+      isUnReaction: false,
+      unReactionSuccess: true,
+    };
+  }),
+  on(PostActions.unReactionFailure, (state, { reactionErrorMessage, type }) => {
+    console.log(type);
+    return {
+      ...state,
+      isUnReaction: false,
+      unReactionErrorMessage: reactionErrorMessage,
     };
   }),
 );

@@ -117,6 +117,7 @@ export class PeopleComponent implements OnInit, OnDestroy {
   followUser(user: any, otherId: string) {
     const profile = this.profiles.find((p) => p.id === otherId);
     if (profile) {
+
       this.notificationService.successNotification(
         `Follow ${profile.userName} successfully`,
       );

@@ -33,7 +33,10 @@ type Comment = {
   content: string;
   createdAt: string;
 };
-
+type Post = {
+  id: string;
+  reaction: string[];
+};
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -50,16 +53,17 @@ type Comment = {
   ],
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  reaction: Post[] = [];
   subscription: Subscription[] = [];
   index = 0;
   disabled = true;
   loader = false;
   postList: PostModel[] = [];
   postDetail: PostModel = <PostModel>{};
-
+  currentUser: ProfileModel = <ProfileModel>{};
   postDetail$ = this.store.select('post', 'postDetail');
   errorGetOneMessage$ = this.store.select('post', 'errorGetOneMessage');
-
+  $posts = this.store.select((state) => state.post.posts)
   token$ = this.store.select('auth', 'token');
 
   isGetting$ = this.store.select('post', 'isGettingAll');
@@ -99,7 +103,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       comment: CommentState;
       notification: NotiState;
     }>,
-  ) { }
+  ) {
+
+  }
 
   ngOnInit(): void {
     this.subscription.push(
@@ -151,6 +157,11 @@ export class HomeComponent implements OnInit, OnDestroy {
           );
         }
       }),
+
+      // this.$posts.subscribe((value)=>{
+      //   if(value)
+      //   this.posts = value;
+      // })
     );
   }
 
@@ -169,10 +180,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         PostActions.getAll({ page: this.currentPage, size: this.size }),
       );
     }
-  }
-
-  like() {
-    this.isLiked = !this.isLiked;
   }
 
   showDialogReport(content: PolymorpheusContent<TuiDialogContext>): void {
@@ -309,5 +316,21 @@ export class HomeComponent implements OnInit, OnDestroy {
   //create function to like post
   likePost(item: any) {
     this.isLiked = !this.isLiked;
+  }
+
+  //react to post
+  reactPost(postId: string, senderId: string) {
+    this.isLiked = !this.isLiked;
+    if (this.isLiked === true) {
+      this.store.dispatch(
+        PostActions.reaction({ postId: postId, senderId: senderId }),
+      );
+      console.log('reacted');
+    } else {
+      this.store.dispatch(
+        PostActions.unReaction({ postId: postId, senderId: senderId }),
+      );
+      console.log('unreacted');
+    }
   }
 }

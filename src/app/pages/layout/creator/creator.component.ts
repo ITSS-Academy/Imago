@@ -32,8 +32,7 @@ import { ProfileState } from '../../../../ngrx/profile/profile.state';
   encapsulation: ViewEncapsulation.None,
 })
 export class CreatorComponent
-  implements OnInit, CanComponentDeactivate, OnDestroy
-{
+  implements OnInit, CanComponentDeactivate, OnDestroy {
   isUploadImages = true;
   @Input() isDisabled = this.isUploadImages;
   statusValue: string = '';
@@ -69,7 +68,7 @@ export class CreatorComponent
       post: PostState;
       profile: ProfileState;
     }>,
-  ) {}
+  ) { }
 
   canDeactivate(): boolean {
     if (this.isContentChanged) {

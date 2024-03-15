@@ -14,6 +14,7 @@ export interface PostModel {
   createdAt: DateTime;
   updatedAt: DateTime;
   deletedAt: DateTime;
+
 }
 
 export interface DateTime {

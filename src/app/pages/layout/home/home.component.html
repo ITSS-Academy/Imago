@@ -110,8 +110,13 @@
               </p>
             </div>
             <div class="reaction">
+              @if (item) {
+              <button tuiIconButton type="button" class="reaction_love_button" appearance="custom"
+                icon="tuiIconHeartLarge" size="m" (click)="likePost(item)"></button>
+              } @else {
               <button tuiIconButton type="button" class="reaction_button" appearance="custom" icon="tuiIconHeartLarge"
-                size="m"></button>
+                size="m" (click)="likePost(item)"></button>
+              }
               <button tuiIconButton type="button" appearance="custom" class="reaction_button"
                 icon="tuiIconMessageCircleLarge" size="m"></button>
               <button tuiIconButton type="button" class="reaction_button" appearance="custom"

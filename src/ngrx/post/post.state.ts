@@ -2,9 +2,16 @@ import { PostModel, PostResponse } from '../../app/model/post.model';
 import { HttpErrorResponseModel } from '../../app/model/http-error-response.model';
 
 export interface PostState {
+  post: PostModel;
+  posts: PostModel[];
+
   isReaction: boolean;
   reactionSuccess: boolean;
   reactionErrorMessage: HttpErrorResponseModel;
+
+  isUnReaction: boolean;
+  unReactionSuccess: boolean;
+  unReactionErrorMessage: HttpErrorResponseModel;
 
   minePost: PostResponse;
   postResponse: PostResponse;
